@@ -1,4 +1,5 @@
 data/
+nohup
 __pycache__/
 *.pyc
 .env
