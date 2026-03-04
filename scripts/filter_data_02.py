@@ -206,15 +206,15 @@ def main() -> None:
             categories = get_categories(entry)
 
             product["product_name"] = product_name
-            product["brand_names"] = brand_names
-            product["ingredients"] = ingredients
-            product["categories"] = categories
+            product["brand_names"] = brand_names.split()
+            product["ingredients"] = ingredients.split()
+            product["categories"] = categories.split()
 
             description = (
-                f"The name of this product is {product_name} and it is sold "
-                f"by the following brand or brands: {brand_names}. Its "
-                f"ingredients are {ingredients}. {product_name} is classified "
-                f"into the following categories: {categories}."
+                f"Product: {product_name}. "
+                f"Brands: {brand_names}. "
+                f"Ingredients {ingredients}. "
+                f"Categories: {categories}."
             )
             product["description"] = description
             f.write(orjson.dumps(product))
