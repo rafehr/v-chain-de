@@ -196,6 +196,10 @@ def main() -> None:
     ):
         for entry, line_length in tqdm(stream_jsonl(DATA_FILE)):
             pbar.update(line_length)
+            product_id = entry.get("id")
+            if not product_id:
+                skipped_count += 1
+                continue
             product = {}
             ingredients = get_ingredients(entry)
             if not ingredients:
@@ -205,10 +209,11 @@ def main() -> None:
             brand_names = get_brand_names(entry)
             categories = get_categories(entry)
 
+            product["id"] = product_id
             product["product_name"] = product_name
-            product["brand_names"] = brand_names.split()
-            product["ingredients"] = ingredients.split()
-            product["categories"] = categories.split()
+            product["brand_names"] = brand_names
+            product["ingredients"] = ingredients
+            product["categories"] = categories
 
             description = (
                 f"Product: {product_name}. "
@@ -220,7 +225,8 @@ def main() -> None:
             f.write(orjson.dumps(product))
             f.write(b"\n")
     print(
-        f"Done. {skipped_count} products were skipped because their ingredients were missing."
+        f"Done. {skipped_count} products were skipped because their "
+        f"id or ingredients were missing."
     )
 
 
