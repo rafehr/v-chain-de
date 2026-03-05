@@ -26,6 +26,15 @@ VECTOR_DB_PATH = str(BASE_DIR / VECTOR_DB_DIR)
 
 
 def convert_jsonl_to_doc(entry: Dict) -> Document:
+    """ "
+    Converts a JSONL object to a langchain Document object.
+
+    Args:
+        A dictionary (deserialized JSONL object).
+
+    Returns:
+        A langchain Document object.
+    """
     content = entry["description"]
 
     metadata = {
@@ -39,6 +48,16 @@ def convert_jsonl_to_doc(entry: Dict) -> Document:
 
 
 def create_vector_db(file_path: Path, vector_db: Chroma, batch_size: int = 500) -> None:
+    """
+    Creates a Chroma database and populates it with embedded Document
+    objects representing the OFF products. Works batch-wise and always
+    checks whether a given product is already in the database.
+
+    Args:
+        file_path: Path to the filtered OFF data.
+        vector_db: A Chroma DB instance.
+        batch_size: The number of Document objects to be embedded.
+    """
     file_size = os.path.getsize(DATA_FILE)
     existing_ids = set(vector_db.get()["ids"])
     with tqdm(
