@@ -7,8 +7,7 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 from tqdm import tqdm
-
-from src.utils import stream_jsonl
+from utils import stream_jsonl
 
 load_dotenv()
 

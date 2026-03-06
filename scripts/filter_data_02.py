@@ -1,11 +1,12 @@
 import os
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, List
 
 import orjson
 from dotenv import load_dotenv
 from pydantic import BaseModel, field_validator
 from tqdm import tqdm
+from utils import stream_jsonl
 
 load_dotenv()
 
@@ -155,31 +156,6 @@ def get_categories(entry: Dict) -> str:
         return categories.strip()
 
     return "Unknown"
-
-
-def stream_jsonl(file_path: Path) -> Generator[Tuple[Dict[str, Any], int], None, None]:
-    """
-    Reads a JSON lines file line by line.
-
-    Args:
-        The path to the .jsonl file.
-
-    Yields:
-        A decoded JSON object as dict.
-
-    Raises:
-        FileNotFoundError: If the file does not exist.
-        orjson.JSONDecodeError: If a line is not valid JSON.
-    """
-    try:
-        with open(file_path, "rb") as f:
-            for line in f:
-                length = len(line)
-                if line.strip():
-                    yield orjson.loads(line), length
-    except FileNotFoundError:
-        print(f"Error: The file {file_path} was not found.")
-        raise
 
 
 def main() -> None:
