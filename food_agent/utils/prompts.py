@@ -7,15 +7,15 @@ something else:
 User input: {user_input}
 
 Only return ONE JSON object:
-{{"is_search_query": true/false}}
+{{"is_query": true/false}}
 
 {format_instructions}
 
 Here are a few examples for user input and the correct classification:
 
-User: "Hello, how are you?" -> {"is_search_query": false}
-User: "Please list chocolate with caramel" -> {"is_search_query": true}
-User: "How there gluten-free cookies of brand X?" -> {"is_search_query": true}"""
+User: "Hello, how are you?" -> {{"is_query": false}}
+User: "Please list chocolate with caramel" -> {{"is_query": true}}
+User: "How there gluten-free cookies of brand X?" -> {{"is_query": true}}"""
 
 CLASSIFICATION_PROMPT = ChatPromptTemplate.from_messages(
     [("system", CLASSIFICATION_INSTRUCTIONS), ("user", "{user_input}")]
