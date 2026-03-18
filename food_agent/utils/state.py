@@ -11,3 +11,4 @@ class GraphState(TypedDict):
     retrieved_products: List[Dict]
     retry_count: int
     error_log: str | None
+    is_query: bool
