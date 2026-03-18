@@ -19,6 +19,18 @@ class RefinedQuery(BaseModel):
     )
 
 
+def input_router(state: GraphState):
+    pass
+
+
+def input_classifier(state: GraphState) -> dict:
+    return {}
+
+
+def chat(state: GraphState) -> dict:
+    return {}
+
+
 def refine_query(state: GraphState) -> dict:
     count = state.get("retry_count", 0) + 1
     parser = PydanticOutputParser(pydantic_object=RefinedQuery)
