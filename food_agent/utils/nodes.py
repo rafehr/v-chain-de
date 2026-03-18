@@ -2,8 +2,14 @@ from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 
 from food_agent.utils.models import get_model
-from food_agent.utils.prompts import REFINEMENT_PROMPT
+from food_agent.utils.prompts import CLASSIFICATION_PROMPT, REFINEMENT_PROMPT
 from food_agent.utils.state import GraphState
+
+
+class RouteInput(BaseModel):
+    is_query: bool = Field(
+        description="True if the user asks for food products, False otherwise."
+    )
 
 
 class RefinedQuery(BaseModel):
@@ -20,15 +26,35 @@ class RefinedQuery(BaseModel):
 
 
 def input_router(state: GraphState):
-    pass
+    if state["is_query"]:
+        return "query"
+    return "no_query"
 
 
 def input_classifier(state: GraphState) -> dict:
-    return {}
+    parser = PydanticOutputParser(pydantic_object=RouteInput)
+    user_input = state["messages"][-1].content
+    format_instructions = parser.get_format_instructions()
+    prompt = CLASSIFICATION_PROMPT.partial(format_instructions=format_instructions)
+    model = get_model(
+        model_name="Qwen/Qwen2.5-7B-Instruct", temperature=0.1, max_new_tokens=100
+    )
+    chain = prompt | model | parser
+    try:
+        response = chain.invoke({"user_input": user_input})
+        return {"is_query": response.is_query}
+    except Exception as e:
+        print(e)
+        return {"is_query": False}
 
 
-def chat(state: GraphState) -> dict:
-    return {}
+def chat_node(state: GraphState) -> dict:
+    model = get_model(
+        model_name="Qwen/Qwen2.5-7B-Instruct", temperature=0.1, max_new_tokens=100
+    )
+    response = model.invoke(state["messages"][-1].content)
+    print(response.content)
+    return {"messages": [response]}
 
 
 def refine_query(state: GraphState) -> dict:
