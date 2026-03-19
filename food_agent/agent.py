@@ -1,4 +1,9 @@
+import uuid
+
 from langchain_core.messages import HumanMessage
+from langchain_core.runnables import RunnableConfig
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.errors import GraphRecursionError
 from langgraph.graph import END, START, StateGraph
 
 from food_agent.utils.nodes import (
@@ -41,7 +46,8 @@ I am not sure how this work, but here we go: I would like to give me results
 for Ice Cream with caramell. Maybe by Ben and Jerry's, but other brands are fine, too."""
 # query = "Hey, what is your name?"
 
-agent = builder.compile()
+memory = MemorySaver()
+agent = builder.compile(checkpointer=memory)
 
 draw_graph(agent)
 
@@ -54,4 +60,18 @@ inputs: GraphState = {
     "error_log": None,
     "is_query": False,
 }
-agent.invoke(inputs)
+
+session_id = str(uuid.uuid4())
+
+config: RunnableConfig = {
+    "configurable": {"thread_id": session_id},
+    "recursion_limit": 20,
+}
+
+try:
+    result = agent.invoke(inputs, config=config)
+except GraphRecursionError:
+    result = {"messges": ["Recursion limit exceeded"]}
+
+print(len(result["messages"]), result["messages"])
+print(result["refined_query"])
