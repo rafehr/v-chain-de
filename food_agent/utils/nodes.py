@@ -1,9 +1,12 @@
+from langchain_core.messages import AIMessage
 from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, Field
 
 from food_agent.utils.models import get_model
 from food_agent.utils.prompts import CLASSIFICATION_PROMPT, REFINEMENT_PROMPT
 from food_agent.utils.state import GraphState
+from food_agent.utils.vectorstore import db
 
 
 class RouteInput(BaseModel):
@@ -53,7 +56,6 @@ def chat_node(state: GraphState) -> dict:
         model_name="Qwen/Qwen2.5-7B-Instruct", temperature=0.1, max_new_tokens=100
     )
     response = model.invoke(state["messages"][-1].content)
-    print(response.content)
     return {"messages": [response]}
 
 
@@ -68,33 +70,51 @@ def refine_query(state: GraphState) -> dict:
     )
     chain = prompt | model
     response = chain.invoke({"user_query": user_query})
-    return {"refined_query": response.content, "retry_count": count}
+    return {
+        "refined_query": response.content,
+        "retry_count": count,
+        "steps": 1,
+    }
 
 
 def validate_refinement(state: GraphState) -> dict:
     parser = PydanticOutputParser(pydantic_object=RefinedQuery)
     try:
         refined_query = parser.parse(state["refined_query"])
-        print(refined_query)
-        return {"refined_query": refined_query, "error_log": None}
+        refined_query = refined_query.model_dump()
+        final_query = []
+        for key, value in refined_query.items():
+            if value and key != "original_query":
+                final_query.append(f"{key}: {value}")
+        final_query = " ".join(final_query)
+        return {
+            "refined_query": final_query,
+            "error_log": None,
+        }
     except Exception as e:
         return {"error_log": str(e)}
 
 
 def error_handling(state: GraphState):
-    print("Better luck next time!")
+    return {"messages": AIMessage(["Better luck next time!"])}
 
 
-def query_db(state: GraphState) -> dict:
-    print("Success!")
-    return {}
+def query_db(state: GraphState, config: RunnableConfig) -> dict:
+    refined_query = str(state.get("refined_query", ""))
+    retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 5})
+    documents = retriever.invoke(refined_query, config=config)
+    for doc in documents:
+        print(doc.page_content)
+    return {"messages": AIMessage(["Success!"])}
 
 
-def refinement_router(state: GraphState) -> str:
+def refinement_router(state: GraphState, config: RunnableConfig) -> str:
+    remaining = state.get("remaining_steps", 0)
+
+    if state.get("retry_count", 0) >= 3 or remaining <= 2:
+        return "give_up"
+
     if not state["error_log"]:
         return "query_db"
-
-    if state.get("retry_count", 0) >= 3:
-        return "give_up"
 
     return "retry"
