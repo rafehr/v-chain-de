@@ -1,3 +1,5 @@
+from langchain_classic.retrievers.document_compressors import CrossEncoderReranker
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from langchain_core.messages import AIMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.runnables import RunnableConfig
@@ -7,6 +9,9 @@ from food_agent.utils.models import get_model
 from food_agent.utils.prompts import CLASSIFICATION_PROMPT, REFINEMENT_PROMPT
 from food_agent.utils.state import GraphState
 from food_agent.utils.vectorstore import db
+
+model = HuggingFaceCrossEncoder(model_name="mixedbread-ai/mxbai-rerank-xsmall-v1")
+reranker = CrossEncoderReranker(model=model, top_n=5)
 
 
 class RouteInput(BaseModel):
@@ -101,10 +106,17 @@ def error_handling(state: GraphState):
 
 def query_db(state: GraphState, config: RunnableConfig) -> dict:
     refined_query = str(state.get("refined_query", ""))
-    retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 5})
+
+    retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 12})
+    # compressor = FlashrankRerank()
+    # compression_retriever = ContextualCompressionRetriever(
+    #     base_compressor=compressor, base_retriever=retriever
+    # )
     documents = retriever.invoke(refined_query, config=config)
-    for doc in documents:
+    final_docs = reranker.compress_documents(documents=documents, query=refined_query)
+    for doc in final_docs:
         print(doc.page_content)
+        print()
     return {"messages": AIMessage(["Success!"])}
 
 
