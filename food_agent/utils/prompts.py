@@ -48,3 +48,22 @@ REFINEMENT_PROMPT = ChatPromptTemplate.from_messages(
         ("user", "{user_query}"),
     ]
 )
+
+QUERY_ANSWER_INSTRUCTIONS = """You are an expert for food products 
+sold in Germany. Your job is to present the products given to you
+in a visually appealing manner. Also, use your world knowledge to tell
+the user where to products are sold in Germany. Please filter out products 
+that do not match the original query. But I want you to still list them 
+clearly marked as not relevant.
+
+The original query:
+
+{original_query}
+"""
+
+QUERY_ANSWER_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        ("system", QUERY_ANSWER_INSTRUCTIONS),
+        ("user", "These are the products that were found: {context}"),
+    ]
+)
