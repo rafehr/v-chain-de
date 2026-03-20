@@ -9,6 +9,7 @@ from langgraph.graph import END, START, StateGraph
 from food_agent.utils.nodes import (
     chat_node,
     error_handling,
+    generate_answer,
     input_classifier,
     input_router,
     query_db,
@@ -27,6 +28,7 @@ builder.add_node("query_db", query_db)
 builder.add_node("error_handling", error_handling)
 builder.add_node("input_classifier", input_classifier)
 builder.add_node("chat_node", chat_node)
+builder.add_node("generate_answer", generate_answer)
 
 builder.add_edge(START, "input_classifier")
 builder.add_conditional_edges(
@@ -38,7 +40,8 @@ builder.add_conditional_edges(
     refinement_router,
     {"retry": "refine_query", "query_db": "query_db", "give_up": "error_handling"},
 )
-builder.add_edge("query_db", END)
+builder.add_edge("query_db", "generate_answer")
+builder.add_edge("generate_answer", END)
 builder.add_edge("chat_node", END)
 
 query = """Hey, how are you! I'm talking to a Chatbot for the first time.
@@ -70,8 +73,12 @@ config: RunnableConfig = {
 
 try:
     result = agent.invoke(inputs, config=config)
+    result = agent.invoke(
+        {"messages": [HumanMessage("What would you recommend?")]}, config=config
+    )
 except GraphRecursionError:
     result = {"messges": ["Recursion limit exceeded"]}
 
 print(len(result["messages"]), result["messages"])
-print(result["refined_query"])
+print(result["error_log"])
+# print(result["messages"][-1].content)
