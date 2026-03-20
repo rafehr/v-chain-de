@@ -1,17 +1,21 @@
 from langchain_classic.retrievers.document_compressors import CrossEncoderReranker
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, Field
 
 from food_agent.utils.models import get_model
-from food_agent.utils.prompts import CLASSIFICATION_PROMPT, REFINEMENT_PROMPT
+from food_agent.utils.prompts import (
+    CLASSIFICATION_PROMPT,
+    QUERY_ANSWER_PROMPT,
+    REFINEMENT_PROMPT,
+)
 from food_agent.utils.state import GraphState
 from food_agent.utils.vectorstore import db
 
 model = HuggingFaceCrossEncoder(model_name="mixedbread-ai/mxbai-rerank-xsmall-v1")
-reranker = CrossEncoderReranker(model=model, top_n=5)
+reranker = CrossEncoderReranker(model=model, top_n=10)
 
 
 class RouteInput(BaseModel):
@@ -108,16 +112,10 @@ def query_db(state: GraphState, config: RunnableConfig) -> dict:
     refined_query = str(state.get("refined_query", ""))
 
     retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 12})
-    # compressor = FlashrankRerank()
-    # compression_retriever = ContextualCompressionRetriever(
-    #     base_compressor=compressor, base_retriever=retriever
-    # )
     documents = retriever.invoke(refined_query, config=config)
     final_docs = reranker.compress_documents(documents=documents, query=refined_query)
-    for doc in final_docs:
-        print(doc.page_content)
-        print()
-    return {"messages": AIMessage(["Success!"])}
+    retrieved_products = [doc.metadata for doc in final_docs]
+    return {"retrieved_products": retrieved_products}
 
 
 def refinement_router(state: GraphState, config: RunnableConfig) -> str:
@@ -130,3 +128,34 @@ def refinement_router(state: GraphState, config: RunnableConfig) -> str:
         return "query_db"
 
     return "retry"
+
+
+def generate_answer(state: GraphState) -> dict:
+    original_query = state["messages"][-1].content
+    products = state.get("retrieved_products", [])
+    prompt = QUERY_ANSWER_PROMPT
+    model = get_model(
+        model_name="Qwen/Qwen2.5-7B-Instruct", temperature=0.7, max_new_tokens=2000
+    )
+    chain = prompt | model
+    response: BaseMessage = chain.invoke(
+        {"original_query": original_query, "context": _format_products(products)}
+    )
+    return {"messages": [response]}
+
+
+def _format_products(products: list[dict]) -> str:
+    products_str = ""
+    count = 1
+    for product in products:
+        url = "https://de.openfoodfacts.org/produkt/" + product["id"]
+        product_info = (
+            f"{count}. Product name: {product['product_name']}\n"
+            f"Brands: {product['brands']}\n"
+            f"Ingredients: {product['ingredients']}\n"
+            f"Categories: {product['categories']}\n"
+            f"Open food facts url: {url}\n"
+        )
+        products_str = products_str + product_info
+        count += 1
+    return products_str
