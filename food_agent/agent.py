@@ -52,33 +52,31 @@ for Ice Cream with caramell. Maybe by Ben and Jerry's, but other brands are fine
 memory = MemorySaver()
 agent = builder.compile(checkpointer=memory)
 
-draw_graph(agent)
+if __name__ == "__main__":
+    draw_graph(agent)
 
-inputs: GraphState = {
-    "messages": [HumanMessage(content=query)],
-    "refined_query": "",
-    "search_params": None,
-    "retrieved_products": [],
-    "retry_count": 0,
-    "error_log": None,
-    "is_query": False,
-}
+    query = input("Please type in your query: ")
 
-session_id = str(uuid.uuid4())
+    inputs: GraphState = {
+        "messages": [HumanMessage(content=query)],
+        "refined_query": "",
+        "search_params": None,
+        "retrieved_products": [],
+        "retry_count": 0,
+        "error_log": None,
+        "is_query": False,
+    }
 
-config: RunnableConfig = {
-    "configurable": {"thread_id": session_id},
-    "recursion_limit": 20,
-}
+    session_id = str(uuid.uuid4())
 
-try:
-    result = agent.invoke(inputs, config=config)
-    result = agent.invoke(
-        {"messages": [HumanMessage("What would you recommend?")]}, config=config
-    )
-except GraphRecursionError:
-    result = {"messges": ["Recursion limit exceeded"]}
+    config: RunnableConfig = {
+        "configurable": {"thread_id": session_id},
+        "recursion_limit": 20,
+    }
 
-print(len(result["messages"]), result["messages"])
-print(result["error_log"])
-# print(result["messages"][-1].content)
+    try:
+        result = agent.invoke(inputs, config=config)
+    except GraphRecursionError:
+        result = {"messges": ["Recursion limit exceeded"]}
+
+    print(result["messages"][-1].content)
