@@ -49,7 +49,9 @@ def input_classifier(state: GraphState) -> dict:
     format_instructions = parser.get_format_instructions()
     prompt = CLASSIFICATION_PROMPT.partial(format_instructions=format_instructions)
     model = get_model(
-        model_name="Qwen/Qwen2.5-7B-Instruct", temperature=0.1, max_new_tokens=100
+        model_name="claude-sonnet-4-5",
+        temperature=0.1,
+        max_new_tokens=100,
     )
     chain = prompt | model | parser
     try:
@@ -62,7 +64,9 @@ def input_classifier(state: GraphState) -> dict:
 
 def chat_node(state: GraphState) -> dict:
     model = get_model(
-        model_name="Qwen/Qwen2.5-7B-Instruct", temperature=0.1, max_new_tokens=100
+        model_name="claude-sonnet-4-5",
+        temperature=0.1,
+        max_new_tokens=100,
     )
     response = model.invoke(state["messages"][-1].content)
     return {"messages": [response]}
@@ -75,7 +79,9 @@ def refine_query(state: GraphState) -> dict:
     format_instructions = parser.get_format_instructions()
     prompt = REFINEMENT_PROMPT.partial(format_instructions=format_instructions)
     model = get_model(
-        model_name="Qwen/Qwen2.5-7B-Instruct", temperature=0.1, max_new_tokens=100
+        model_name="claude-sonnet-4-5",
+        temperature=0.1,
+        max_new_tokens=100,
     )
     chain = prompt | model
     response = chain.invoke({"user_query": user_query})
@@ -110,6 +116,7 @@ def error_handling(state: GraphState):
 
 def query_db(state: GraphState, config: RunnableConfig) -> dict:
     refined_query = str(state.get("refined_query", ""))
+    print(f"REFINED_QUERY: {refined_query}")
 
     retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 12})
     documents = retriever.invoke(refined_query, config=config)
@@ -135,7 +142,9 @@ def generate_answer(state: GraphState) -> dict:
     products = state.get("retrieved_products", [])
     prompt = QUERY_ANSWER_PROMPT
     model = get_model(
-        model_name="Qwen/Qwen2.5-7B-Instruct", temperature=0.7, max_new_tokens=2000
+        model_name="claude-sonnet-4-5",
+        temperature=0.7,
+        max_new_tokens=2000,
     )
     chain = prompt | model
     response: BaseMessage = chain.invoke(
