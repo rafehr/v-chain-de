@@ -9,16 +9,13 @@ from food_agent.agent import agent
 from food_agent.utils.state import GraphState
 
 
-def add_numbers(Num1, Num2):
-    return Num1 + Num2
-
-
 def generate_response(
     query: str, history: list[list[str | None]], session_id: str
 ) -> str:
     inputs: GraphState = {
         "messages": [HumanMessage(content=query)],
         "refined_query": "",
+        "original_query": None,
         "search_params": None,
         "retrieved_products": [],
         "retry_count": 0,
