@@ -1,3 +1,5 @@
+import json
+
 from langchain_classic.retrievers.document_compressors import CrossEncoderReranker
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from langchain_core.messages import AIMessage, BaseMessage
@@ -45,7 +47,9 @@ def input_router(state: GraphState):
 
 def input_classifier(state: GraphState) -> dict:
     parser = PydanticOutputParser(pydantic_object=RouteInput)
-    user_input = state["messages"][-1].content
+    # user_input = state["messages"][-1].content
+    user_input = state["messages"]
+    print(user_input)
     format_instructions = parser.get_format_instructions()
     prompt = CLASSIFICATION_PROMPT.partial(format_instructions=format_instructions)
     model = get_model(
@@ -63,19 +67,23 @@ def input_classifier(state: GraphState) -> dict:
 
 
 def chat_node(state: GraphState) -> dict:
+    print("Enter chat node")
     model = get_model(
         model_name="claude-sonnet-4-5",
         temperature=0.1,
         max_new_tokens=100,
     )
-    response = model.invoke(state["messages"][-1].content)
+    # response = model.invoke(state["messages"][-1].content)
+    response = model.invoke(state["messages"])
     return {"messages": [response]}
 
 
 def refine_query(state: GraphState) -> dict:
+    print("Enter refine query")
+    original_query = str(state["messages"][-1].content)
     count = state.get("retry_count", 0) + 1
     parser = PydanticOutputParser(pydantic_object=RefinedQuery)
-    user_query = state["messages"][-1].content
+    chat_history = state["messages"][-5:]
     format_instructions = parser.get_format_instructions()
     prompt = REFINEMENT_PROMPT.partial(format_instructions=format_instructions)
     model = get_model(
@@ -84,8 +92,9 @@ def refine_query(state: GraphState) -> dict:
         max_new_tokens=100,
     )
     chain = prompt | model
-    response = chain.invoke({"user_query": user_query})
+    response = chain.invoke({"messages": chat_history})
     return {
+        "original_query": original_query,
         "refined_query": response.content,
         "retry_count": count,
         "steps": 1,
@@ -110,21 +119,6 @@ def validate_refinement(state: GraphState) -> dict:
         return {"error_log": str(e)}
 
 
-def error_handling(state: GraphState):
-    return {"messages": AIMessage(["Better luck next time!"])}
-
-
-def query_db(state: GraphState, config: RunnableConfig) -> dict:
-    refined_query = str(state.get("refined_query", ""))
-    print(f"REFINED_QUERY: {refined_query}")
-
-    retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 12})
-    documents = retriever.invoke(refined_query, config=config)
-    final_docs = reranker.compress_documents(documents=documents, query=refined_query)
-    retrieved_products = [doc.metadata for doc in final_docs]
-    return {"retrieved_products": retrieved_products}
-
-
 def refinement_router(state: GraphState, config: RunnableConfig) -> str:
     remaining = state.get("remaining_steps", 0)
 
@@ -137,8 +131,26 @@ def refinement_router(state: GraphState, config: RunnableConfig) -> str:
     return "retry"
 
 
+def error_handling(state: GraphState):
+    return {"messages": AIMessage(["Better luck next time!"])}
+
+
+def query_db(state: GraphState, config: RunnableConfig) -> dict:
+    refined_query = str(state.get("refined_query", ""))
+    print(f"REFINED_QUERY: {refined_query}")
+
+    retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 12})
+    documents = retriever.invoke(refined_query, config=config)
+    final_docs = reranker.compress_documents(documents=documents, query=refined_query)
+    retrieved_products = [doc.metadata for doc in final_docs]
+    return {
+        "messages": [AIMessage(content=json.dumps(retrieved_products))],
+        "retrieved_products": retrieved_products,
+    }
+
+
 def generate_answer(state: GraphState) -> dict:
-    original_query = state["messages"][-1].content
+    original_query = state["original_query"]
     products = state.get("retrieved_products", [])
     prompt = QUERY_ANSWER_PROMPT
     model = get_model(

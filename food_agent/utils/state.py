@@ -9,6 +9,7 @@ from typing_extensions import NotRequired
 class GraphState(TypedDict):
     messages: Annotated[List[BaseMessage], add_messages]
     refined_query: str
+    original_query: str | None
     search_params: Dict | None
     retrieved_products: List[Dict]
     retry_count: int
