@@ -1,5 +1,7 @@
 # 🌿🔗 V-Chain-DE
 
+Status: 🛠️ Under Development / Prototype
+
 A RAG (Retrieval-Augmented Generation) chatbot that provides precise information on vegan German food products based on a subset of the [**Open Food Facts**](https://openfoodfacts.org) database.
 
 ## Licensing
