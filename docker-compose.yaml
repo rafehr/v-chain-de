@@ -1,0 +1,12 @@
+services:
+  food-agent:
+    build: .
+    ports:
+      - "7860:7860"
+    env_file:
+      - .env
+    environment:
+    - VECTOR_DB_DIR=/app/off_db
+    - GRADIO_SERVER_NAME=0.0.0.0
+    volumes:
+      - ./off_db:/app/off_db

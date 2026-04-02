@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv
+venv/
+.gradio/
+.env
+.git
+.ipynb_checkpoints
+data/
+off_db/
