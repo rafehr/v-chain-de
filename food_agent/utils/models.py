@@ -33,6 +33,7 @@ def get_model(
         timeout=None,
         stop=None,
         api_key=secret_key,
+        streaming=True,
     )
     return llm
 

@@ -1,7 +1,7 @@
 import uuid
 
 import gradio as gr
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.errors import GraphRecursionError
 
@@ -9,9 +9,7 @@ from food_agent.agent import agent
 from food_agent.utils.state import GraphState
 
 
-def generate_response(
-    query: str, history: list[list[str | None]], session_id: str
-) -> str:
+def generate_response(query: str, history: list[list[str | None]], session_id: str):
     inputs: GraphState = {
         "messages": [HumanMessage(content=query)],
         "refined_query": "",
@@ -28,12 +26,21 @@ def generate_response(
         "recursion_limit": 20,
     }
 
-    try:
-        result = agent.invoke(inputs, config=config)
-    except GraphRecursionError:
-        result = {"messges": ["Recursion limit exceeded"]}
+    full_response = ""
 
-    return result["messages"][-1].content
+    try:
+        for chunk, metadata in agent.stream(
+            inputs, config=config, stream_mode="messages"
+        ):
+            if isinstance(chunk, BaseMessage):
+                if metadata.get("langgraph_node") == "generate_answer":
+                    if chunk.content:
+                        full_response += chunk.content
+                        yield full_response
+    except GraphRecursionError:
+        yield {"messges": ["Recursion limit exceeded"]}
+    except Exception as e:
+        yield f"Ein unerwarteter Fehler ist aufgetreten: {str(e)}"
 
 
 if __name__ == "__main__":
