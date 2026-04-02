@@ -49,7 +49,6 @@ def input_classifier(state: GraphState) -> dict:
     parser = PydanticOutputParser(pydantic_object=RouteInput)
     # user_input = state["messages"][-1].content
     user_input = state["messages"]
-    print(user_input)
     format_instructions = parser.get_format_instructions()
     prompt = CLASSIFICATION_PROMPT.partial(format_instructions=format_instructions)
     model = get_model(
@@ -67,7 +66,6 @@ def input_classifier(state: GraphState) -> dict:
 
 
 def chat_node(state: GraphState) -> dict:
-    print("Enter chat node")
     model = get_model(
         model_name="claude-sonnet-4-5",
         temperature=0.1,
@@ -79,7 +77,6 @@ def chat_node(state: GraphState) -> dict:
 
 
 def refine_query(state: GraphState) -> dict:
-    print("Enter refine query")
     original_query = str(state["messages"][-1].content)
     count = state.get("retry_count", 0) + 1
     parser = PydanticOutputParser(pydantic_object=RefinedQuery)
@@ -137,7 +134,6 @@ def error_handling(state: GraphState):
 
 def query_db(state: GraphState, config: RunnableConfig) -> dict:
     refined_query = str(state.get("refined_query", ""))
-    print(f"REFINED_QUERY: {refined_query}")
 
     retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 12})
     documents = retriever.invoke(refined_query, config=config)

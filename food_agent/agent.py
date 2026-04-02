@@ -60,6 +60,7 @@ if __name__ == "__main__":
     inputs: GraphState = {
         "messages": [HumanMessage(content=query)],
         "refined_query": "",
+        "original_query": None,
         "search_params": None,
         "retrieved_products": [],
         "retry_count": 0,
@@ -78,5 +79,3 @@ if __name__ == "__main__":
         result = agent.invoke(inputs, config=config)
     except GraphRecursionError:
         result = {"messges": ["Recursion limit exceeded"]}
-
-    print(result["messages"][-1].content)

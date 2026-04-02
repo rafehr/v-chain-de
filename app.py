@@ -1,12 +1,18 @@
+import os
 import uuid
 
 import gradio as gr
+from dotenv import load_dotenv
 from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.errors import GraphRecursionError
 
 from food_agent.agent import agent
 from food_agent.utils.state import GraphState
+
+load_dotenv()
+
+GRADIO_SERVER_NAME = os.getenv("GRADIO_SERVER_NAME")
 
 
 def generate_response(query: str, history: list[list[str | None]], session_id: str):
@@ -53,4 +59,4 @@ if __name__ == "__main__":
         )
 
     # Launch the interface
-    demo.launch(server_name="127.0.0.1", server_port=7860)
+    demo.launch(server_name=GRADIO_SERVER_NAME, server_port=7860)
