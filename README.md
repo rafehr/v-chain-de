@@ -1,3 +1,7 @@
+# 🌿🔗 V-Chain-DE
+
+A RAG (Retrieval-Augmented Generation) chatbot that provides precise information on vegan German food products based on a subset of the [**Open Food Facts**](https://openfoodfacts.org) database.
+
 ## Licensing
 
 - **Software:** The code in this repository is licensed under the [MIT License](LICENSE).
