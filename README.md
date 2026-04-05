@@ -30,7 +30,7 @@ This project is an AI-powered search tool using **Retrieval-Augmented Generation
 - **Framework:** [LangChain](https://langchain.com) & [LangGraph](https://www.langchain.com/langgraph)
 - **Database:** [ChromaDB](https://trychroma.com) (Vector Store)
 - **UI:** [Gradio](https://gradio.app)
-- **Data Source:** [Open Food Facts (JSONL Dump)](https://openfoodfacts.org)
+- **Data Source:** [Open Food Facts (JSONL Dump)](https://world.openfoodfacts.org/data)
 - **Infrastructure:** Docker & Docker Compose
 
 ## Licensing
