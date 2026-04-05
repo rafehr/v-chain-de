@@ -4,6 +4,23 @@ Status: 🛠️ Under Development / Prototype
 
 A RAG (Retrieval-Augmented Generation) chatbot that provides precise information on vegan German food products based on a subset of the [**Open Food Facts**](https://openfoodfacts.org) database.
 
+## ⚠️ Safety & Reliability Disclaimer
+
+This project is an AI-powered search tool using **Retrieval-Augmented Generation (RAG)** based on [Open Food Facts](https://openfoodfacts.org) data. Please read the following carefully before using the information provided:
+
+### 1. Data Source Limitations (Open Food Facts)
+*   **Crowdsourced:** Data is contributed by users and may contain manual entry errors or outdated information.
+*   **OCR Errors:** Ingredients are often scanned via Optical Character Recognition (OCR), which can misinterpret characters (e.g., missing a comma or misreading an allergen).
+*   **Reformulations:** Manufacturers change recipes frequently; the database may not reflect the specific version of the product you have in hand.
+
+### 2. AI & LLM Limitations (RAG)
+*   **Hallucinations:** Large Language Models (LLMs) can confidently generate false information. Even if the underlying data is correct, the AI may misinterpret or "invent" details during the generation process.
+*   **Synthesis Risk:** The AI might overlook critical "may contain" traces or fail to distinguish between a "free-from" marketing claim and the actual legal ingredient list.
+
+### 3. Final Warning
+**This tool is NOT a medical or clinical device.** If you have a life-threatening allergy or strict dietary requirement, **always verify the physical label on the product packaging.** The developers and data providers assume no liability for any adverse reactions, inaccuracies, or reliance on the information provided by this bot.
+
+
 ## 🛠 Tech Stack
 
 - **Framework:** [LangChain](https://langchain.com) & [LangGraph](https://www.langchain.com/langgraph)
