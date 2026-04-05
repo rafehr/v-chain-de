@@ -24,6 +24,32 @@ This project is an AI-powered search tool using **Retrieval-Augmented Generation
 ### 3. Final Warning
 **This tool is NOT a medical or clinical device.** If you have a life-threatening allergy or strict dietary requirement, **always verify the physical label on the product packaging.** The developers and data providers assume no liability for any adverse reactions, inaccuracies, or reliance on the information provided by this bot.
 
+## 🛤️ Data Pipeline
+
+```mermaid
+graph TD
+    %% 1. Node Definitions
+    A[download_data_01.sh]
+    B(Vegan + DE Products)
+    C[filter_data_02.py]
+    D[create_db_03.py]
+    E[(Chroma DB)]
+
+    %% 2. Flow Logic
+    A -->|Stream & Pre-filter| B
+    B --> C
+    C -->|Extract: Name, Brand, Ingredients, Cat| D
+    D -->|Embedd product representations| E
+
+    %% 3. Styling Definitions
+    classDef script fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef storage fill:#0080ff,stroke:#333,color:#fff,font-weight:bold;
+
+    %% 4. Assign Classes (No spaces after commas!)
+    class A,C,D script
+    class G storage
+```
+
 
 ## 🛠 Tech Stack
 
