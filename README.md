@@ -50,6 +50,9 @@ graph TD
     class G storage
 ```
 
+## 🏗️ Architecture & Graph Logic
+
+![Architecture Diagram](graph.png)
 
 ## 🛠 Tech Stack
 
