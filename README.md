@@ -8,8 +8,6 @@ A RAG (Retrieval-Augmented Generation) chatbot that provides precise information
 
 The purpose of this project is to help find plant-based food products that are sold in Germany. The idea is that an LLM like Claude Sonnet is augmented with a subset from the data of the **Open Food Facts** (OFF) database to reduce hallucinations and the LLM, on the other hand, could use its world knowledge to clarify in case the vegan status ascertained by OFF is doubtful.[^1] E.g. there can be [products with meat flavor](https://de.openfoodfacts.org/produkt/8801073110502/buldak-hot-chicken-black-samyang) labeled as vegan in OFF and a powerful LLM would be able to dissect the ingredients and give additional information on the vegan status of those ingredients. For example, the generic ingredient "flavor" (_Aroma_ in German) can contain non-allergenic animal-derived components without explicit labeling.
 
-[^1]: Since OFF is a crowdsourced project, it may contain errors (see Safety & Reliability Disclaimer below).
-
 ## ⚠️ Safety & Reliability Disclaimer
 
 This project is an AI-powered search tool using **Retrieval-Augmented Generation (RAG)** based on [Open Food Facts](https://openfoodfacts.org) data. Please read the following carefully before using the information provided:
@@ -44,3 +42,7 @@ This project is an AI-powered search tool using **Retrieval-Augmented Generation
 ## Acknowledgments
 - Data provided by [Open Food Facts](https://openfoodfacts.org) (ODbL).
 - Built with [LangGraph](https://www.langchain.com/langgraph) and [Gradio](https://gradio.app).
+
+## Footnotes
+
+[^1]: Since OFF is a crowdsourced project, it may contain errors (see Safety & Reliability Disclaimer below).
