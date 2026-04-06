@@ -65,6 +65,7 @@ graph TD
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
+- **Git LFS** (Required to download the pre-built Chroma DB)
 - **Docker** and **Docker Compose**
 - **Anthropic API Key**
 
