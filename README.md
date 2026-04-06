@@ -54,6 +54,29 @@ graph TD
 
 ![Architecture Diagram](graph.png)
 
+## 🚀 Features
+
+- **Query Classification:** Automatically detects whether the user is asking about a product or just engaging in "small talk" or has a follow-up question about the product not involving another query.
+- **Autonomous Refinement Loop:** Automatically refines user queries for optimized vector search.
+- **Pydantic Validation:** Ensures reliability by structuring and validating search parameters through Pydantic models.
+- **Reranking:** Implements a reranker to refine search results, increasing context precision for the LLM.
+- **Gradio UI:** A user-friendly chat interface for interaction with the food agent.
+
+
+## 📂 Project Structure
+
+```text
+├── food_agent/             # Core Logic
+│   ├── agent.py            # LangGraph workflow definition
+│   └── utils/              # Node functions, prompts, schemas & vectorstore setup
+├── scripts/                # Data Pipeline (Download -> Filter -> Embedding)
+├── data/                   # Raw & processed OpenFoodFacts JSONL files
+├── off_db/                 # Persistent ChromaDB vector store
+├── tests/                  # Pytest suite for parsers and logic
+├── app.py                  # Main entry point (CLI or API)
+└── docker-compose.yaml     # Container orchestration
+```
+
 ## 🛠 Tech Stack
 
 - **Framework:** [LangChain](https://langchain.com) & [LangGraph](https://www.langchain.com/langgraph)
