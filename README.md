@@ -74,13 +74,20 @@ graph TD
 1. **Clone the repository:**
    ```bash
    git clone git@github.com:rafehr/v-chain-de.git
-   cd v-chain-de```
+   cd v-chain-de
+   ```
 
 2. **Configure the environment**
 
     Create an `.env` file and add this:
 
     ```CLAUDE_API_TOKEN=your_api_key_here```
+
+3. **Build and start the application**
+
+    ```bash
+    docker compose up --build
+    ```
 
 ## 📂 Project Structure
 
