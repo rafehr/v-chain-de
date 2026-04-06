@@ -45,14 +45,15 @@ def input_router(state: GraphState):
     return "no_query"
 
 
-def input_classifier(state: GraphState) -> dict:
+def input_classifier(state: GraphState, config: RunnableConfig) -> dict:
+    model_name = config.get("configurable", {}).get("model_name", "claude-sonnet-4-5")
     parser = PydanticOutputParser(pydantic_object=RouteInput)
     # user_input = state["messages"][-1].content
     user_input = state["messages"]
     format_instructions = parser.get_format_instructions()
     prompt = CLASSIFICATION_PROMPT.partial(format_instructions=format_instructions)
     model = get_model(
-        model_name="claude-sonnet-4-5",
+        model_name=model_name,
         temperature=0.1,
         max_new_tokens=100,
     )
@@ -65,9 +66,10 @@ def input_classifier(state: GraphState) -> dict:
         return {"is_query": False}
 
 
-def chat_node(state: GraphState) -> dict:
+def chat_node(state: GraphState, config: RunnableConfig) -> dict:
+    model_name = config.get("configurable", {}).get("model_name", "claude-sonnet-4-5")
     model = get_model(
-        model_name="claude-sonnet-4-5",
+        model_name=model_name,
         temperature=0.1,
         max_new_tokens=100,
     )
@@ -76,7 +78,8 @@ def chat_node(state: GraphState) -> dict:
     return {"messages": [response]}
 
 
-def refine_query(state: GraphState) -> dict:
+def refine_query(state: GraphState, config: RunnableConfig) -> dict:
+    model_name = config.get("configurable", {}).get("model_name", "claude-sonnet-4-5")
     original_query = str(state["messages"][-1].content)
     count = state.get("retry_count", 0) + 1
     parser = PydanticOutputParser(pydantic_object=RefinedQuery)
@@ -84,7 +87,7 @@ def refine_query(state: GraphState) -> dict:
     format_instructions = parser.get_format_instructions()
     prompt = REFINEMENT_PROMPT.partial(format_instructions=format_instructions)
     model = get_model(
-        model_name="claude-sonnet-4-5",
+        model_name=model_name,
         temperature=0.1,
         max_new_tokens=100,
     )
@@ -145,12 +148,13 @@ def query_db(state: GraphState, config: RunnableConfig) -> dict:
     }
 
 
-def generate_answer(state: GraphState) -> dict:
+def generate_answer(state: GraphState, config: RunnableConfig) -> dict:
+    model_name = config.get("configurable", {}).get("model_name", "claude-sonnet-4-5")
     original_query = state["original_query"]
     products = state.get("retrieved_products", [])
     prompt = QUERY_ANSWER_PROMPT
     model = get_model(
-        model_name="claude-sonnet-4-5",
+        model_name=model_name,
         temperature=0.7,
         max_new_tokens=2000,
     )

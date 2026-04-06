@@ -12,6 +12,7 @@ from food_agent.utils.state import GraphState
 
 load_dotenv()
 
+MODEL_NAME = os.getenv("MODEL_NAME")
 GRADIO_SERVER_NAME = os.getenv("GRADIO_SERVER_NAME")
 
 
@@ -28,7 +29,7 @@ def generate_response(query: str, history: list[list[str | None]], session_id: s
     }
 
     config: RunnableConfig = {
-        "configurable": {"thread_id": session_id},
+        "configurable": {"thread_id": session_id, "model_name": MODEL_NAME},
         "recursion_limit": 20,
     }
 

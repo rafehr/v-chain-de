@@ -8,5 +8,6 @@ services:
     environment:
     - VECTOR_DB_DIR=/app/off_db
     - GRADIO_SERVER_NAME=0.0.0.0
+    - MODEL_NAME="claude-sonnet-4-5"
     volumes:
       - ./off_db:/app/off_db
