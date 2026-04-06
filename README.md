@@ -1,6 +1,6 @@
 # 🌿🔗 V-Chain-DE
 
-Status: 🛠️ Under Development / Prototype
+**Status: 🛠️ Under Development / Prototype**
 
 A RAG (Retrieval-Augmented Generation) chatbot that provides precise information on vegan German food products based on a subset of the [**Open Food Facts**](https://openfoodfacts.org) database.
 
@@ -62,6 +62,21 @@ graph TD
 - **Reranking:** Implements a reranker to refine search results, increasing context precision for the LLM.
 - **Gradio UI:** A user-friendly chat interface for interaction with the food agent.
 
+## 🛠️ Installation & Setup
+
+### Prerequisites
+- **Docker** and **Docker Compose**
+- **Anthropic API Key**
+
+### Setup Steps
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com
+   cd your-repo-name```
+
+2. **Configure the environment**
+    ```CLAUDE_API_TOKEN=your_api_key_here```
 
 ## 📂 Project Structure
 
