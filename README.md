@@ -26,6 +26,10 @@ This project is an AI-powered search tool using **Retrieval-Augmented Generation
 
 ## 🛤️ Data Pipeline
 
+1. `download_data_01.sh`: Streams and pre-filters the data from the [JSON dump](https://static.openfoodfacts.org/data/openfoodfacts-products.jsonl.gz) to only include vegan food products sold in Germany.
+2. `filter_data_02.py`: Filters the data further by only extracting relevant information: Name of the product, brand name(s), ingredients and categories.
+3. `create_db_03.py`: Builds the Chroma database.
+
 ```mermaid
 graph TD
     %% 1. Node Definitions
@@ -50,9 +54,31 @@ graph TD
     class G storage
 ```
 
+### Data Customization
+
+The repository includes a pre-built **ChromaDB** containing the processed German food data, so you can start querying immediately. However, if you wish to filter the **OpenFoodFacts** data differently (maybe for a different country) or include additional fields, you can modify and run the data pipeline.
+
 ## 🏗️ Architecture & Graph Logic
 
+The chatbot's decision logic is orchestrated via **LangGraph**, utilizing a state-based workflow:
+
+*   **Input Classification:** An entry node determines if the user input is a product search, a general interaction or a follow-up question not involving a query.
+*   **Query Refinement:** A dedicated node optimizes the raw user query into a search-friendly string for ChromaDB. It uses Pydantic to ensure a consistent output format.
+*   **Validation Node:** A node verifies whether the refinement was successful.
+    *   **Self-Correction Loop:** If validation fails, the graph edges back to the refinement node.
+    *   **Retry Logic:** A counter limits the loop to **three attempts** before the process terminates or proceeds to the next state.
+*   **Query DB Node**:  A node that handles the querying of the Chroma database. Uses re-ranking to increase context precision.
+*   **Generate Answer**: This node uses the context provided by the vector search to answer the user query.
+*   **Persistence:** Integrated **checkpointers** save the graph state, enabling multi-turn conversations and full session recovery.
+
 ![Architecture Diagram](graph.png)
+
+## Language & Taxonomy
+
+Although this project focuses on **food products sold in Germany**, the chatbot is designed to be queried in **English**. 
+
+**Why English?**
+The system utilizes the **English ingredient and category taxonomy** from OpenFoodFacts for indexing and retrieval. This ensures more reliable metadata mapping and consistent vector search results, as the English taxonomy is currently the most comprehensive and standardized within the dataset.
 
 ## 🚀 Features
 
@@ -66,6 +92,7 @@ graph TD
 
 This project is currently in the **prototype phase**. Planned enhancements include:
 
+- [ ] **Prompt Engineering**: Revise the prompts for better results.
 - [ ] **Asynchronous Execution:** Refactor LangGraph nodes to use async/await patterns to reduce latency and handle I/O-bound tasks concurrently.
 - [ ] **RAGAS Evaluation:** Implement an automated evaluation pipeline to measure faithfulness and relevance.
 - [ ] **Metadata Filtering:** A mechanism to filter by specific brands or categories (e.g., "Organic/Bio" only) and handle negations (e.g. "no peanuts").
@@ -97,6 +124,9 @@ This project is currently in the **prototype phase**. Planned enhancements inclu
     ```bash
     docker compose up --build
     ```
+4. **Access the chat interface**:
+
+    Go to `http://localhost:7860/`in your browser.
 
 ## 📂 Project Structure
 
