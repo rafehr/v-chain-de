@@ -62,6 +62,15 @@ graph TD
 - **Reranking:** Implements a reranker to refine search results, increasing context precision for the LLM.
 - **Gradio UI:** A user-friendly chat interface for interaction with the food agent.
 
+## 🗺️ Roadmap / Future Improvements
+
+This project is currently in the **prototype phase**. Planned enhancements include:
+
+- [ ] **Asynchronous Execution:** Refactor LangGraph nodes to use async/await patterns to reduce latency and handle I/O-bound tasks concurrently.
+- [ ] **RAGAS Evaluation:** Implement an automated evaluation pipeline to measure faithfulness and relevance.
+- [ ] **Metadata Filtering:** A mechanism to filter by specific brands or categories (e.g., "Organic/Bio" only) and handle negations (e.g. "no peanuts").
+- [ ] **Hybrid Search:** Combining semantic vector search with keyword matching for better brand name accuracy.
+
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
