@@ -73,7 +73,7 @@ The chatbot's decision logic is orchestrated via **LangGraph**, utilizing a stat
 
 ![Architecture Diagram](graph.png)
 
-## Language & Taxonomy
+## 🌐 Language & Taxonomy
 
 Although this project focuses on **food products sold in Germany**, the chatbot is designed to be queried in **English**. 
 
